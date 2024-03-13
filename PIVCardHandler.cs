@@ -52,9 +52,17 @@ namespace PIVert {
             cardHolderUID.SetRandomGuid();
 
             store.Load(new MemoryStream(File.ReadAllBytes(pfxPath)),pfxPassword.ToArray());
-            var firstAlias = store.Aliases.Cast<string>().First();
-            certificateBytes = store.GetCertificate(firstAlias).Certificate.GetEncoded();
-            key = (RsaPrivateCrtKeyParameters)store.GetKey(firstAlias).Key;            
+
+            foreach(var alias in store.Aliases.Cast<string>()) {
+                if (store.IsKeyEntry(alias)) {
+                    key = (RsaPrivateCrtKeyParameters)store.GetKey(alias).Key;
+                    certificateBytes = store.GetCertificate(alias).Certificate.GetEncoded();
+                }                
+            } 
+            
+            if(key == null) {
+                throw new ArgumentException("Could not find any private keys inside the PFX");
+            }                       
         }
 
         public int GetInteger(ReadOnlySpan<byte> data) {
