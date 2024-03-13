@@ -96,7 +96,7 @@ DECIVE_UNIT = 0
 
 
         static void PrintUsage() {
-            Console.WriteLine("Usage: PIVert.exe install | pfx_file pfx_password");
+            Console.WriteLine("Usage: PIVert.exe install | pfx_file [pfx_password]");
             return;
         }
 
@@ -111,6 +111,15 @@ DECIVE_UNIT = 0
                     Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\SmartCardCredentialProvider", "AllowCertificatesWithNoEKU", 1);
                     Console.WriteLine("[+] Enabled AllowCertificatesWithNoEKU on SmartCard Credential Provider");
                 }
+
+                var strictKDC = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters", "KdcValidation", 2);
+
+                if((int)strictKDC == 2) {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters", "KdcValidation", 0);
+                    Console.WriteLine("[+] Disabling strict KDC validation");
+                }
+
+                
 
                 Console.WriteLine("[=] Writing BixVReader.ini config to C:\\Windows");
                 File.WriteAllText(@"C:\Windows\BixVReader.ini", readerConfig);
@@ -169,15 +178,15 @@ DECIVE_UNIT = 0
 
         static void Main(string[] args) {
 
-            if(args.Length == 1 && args[0] != "install" && args.Length != 2) {
+            if(args.Length == 0) {
                 PrintUsage();
                 return;
             }
 
-            if(args.Length == 1) {
+            if(args[0] == "install") {
                 InstallDriver();
             } else {
-                RunEmulation(args[0], args[1]);
+                RunEmulation(args[0], args.Length == 1 ? "" : args[1]);
             }                                           
         }
 
