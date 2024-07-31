@@ -113,13 +113,18 @@ DECIVE_UNIT = 0
                 }
 
                 var strictKDC = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters", "KdcValidation", 2);
-
-                if((int)strictKDC == 2) {
+                if(strictKDC != null && (int)strictKDC == 2) {
                     Registry.SetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters", "KdcValidation", 0);
                     Console.WriteLine("[+] Disabling strict KDC validation");
                 }
 
-                
+                var disableCRL = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters", "UseCachedCRLOnlyAndIgnoreRevocationUnknownErrors", 0);
+                if (disableCRL == null || (disableCRL != null && (int)disableCRL == 0)) {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters", "UseCachedCRLOnlyAndIgnoreRevocationUnknownErrors", 1);
+                    Console.WriteLine("[+] Disabling KDC CRL certificate validation");
+                }
+
+
 
                 Console.WriteLine("[=] Writing BixVReader.ini config to C:\\Windows");
                 File.WriteAllText(@"C:\Windows\BixVReader.ini", readerConfig);
@@ -139,6 +144,7 @@ DECIVE_UNIT = 0
 
             }catch(Exception e) {
                 Console.WriteLine($"[!] Failed to install the virtual smart card reader device: {e.Message}");
+                Console.WriteLine(e.StackTrace);
             }
         }
 
