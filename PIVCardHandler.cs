@@ -132,7 +132,7 @@ namespace PIVert {
                         return DataObjectNotFound;
                     }
 
-                } else if (apduObj.INS == 0x20 && apduObj.P1 == 0x00 && apduObj.P2 == 0x80) {
+                } else if (apduObj.INS == 0x20 && (apduObj.P1 == 0x00 || apduObj.P1 == 0xff) && apduObj.P2 == 0x80) {
 
                     Console.WriteLine($"[+] Received verify PIN APDU, allowing any PIN");
                     return StatusOK;
@@ -241,7 +241,7 @@ namespace PIVert {
                 }
             }
 
-            Console.WriteLine($"[=] Unsupported INS {apduObj.INS:x} with CLA {apduObj.CLA:x}");
+            Console.WriteLine($"[=] Unsupported INS {apduObj.INS:x}, CLA {apduObj.CLA:x}, P1 {apduObj.P1:x}, P2 {apduObj.P2:x}");
             return InstructionNotSupported;
         }
 
